@@ -1,6 +1,9 @@
 fastapi==0.116.2
-fastapi_users==14.0.1
+fastapi_users[sqlalchemy]==14.0.1
 pydantic==2.11.9
 python-dotenv==1.1.1
 SQLAlchemy==2.0.36
 uvicorn==0.36.0
+psycopg[async]==3.2.10
+tzdata==2025.2
+pytz>2021.1

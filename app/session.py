@@ -6,7 +6,7 @@ from app.config import settings
 dbuser = settings.SQL_USER
 dbpassword = settings.SQL_PASSWORD
 
-DATABASE_URL = f"postgresql+psycopg_async://{dbuser}:{dbpassword}@localhost:5432/vocawiki"
+DATABASE_URL = f"postgresql+psycopg_async://{dbuser}:{dbpassword}@localhost:5432/vocawikidb"
 
 # 数据库引擎
 
