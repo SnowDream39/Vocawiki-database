@@ -11,8 +11,8 @@ app = FastAPI()
 # 全局中间件
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "https://vocabili.top", "https://api.vocabili.top"],
-    allow_credentials=False,
+    allow_origins=["*"],
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )

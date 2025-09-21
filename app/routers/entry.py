@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends, Query, Body
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, insert, update
+from sqlalchemy import select
+from sqlalchemy.dialects.postgresql import insert
 
 from app.user_manager import current_active_user
 from app.session import get_async_session
@@ -19,22 +20,22 @@ async def get_producers_entrie(
     producers = result.scalars().all()
     return producers
   
-@router.post("/producer/add")
-async def add_producers(
-    update_producers: list[ProducerEdit] = Body(),
-    session: AsyncSession = Depends(get_async_session)
+@router.post("/producer/upsert")
+async def upsert_producers(
+    update_producers: list[ProducerEdit] = Body(...),
+    session: AsyncSession = Depends(get_async_session),
 ):
     values = [p.model_dump() for p in update_producers]
+
     stmt = insert(Producer).values(values)
+    stmt = stmt.on_conflict_do_update(
+        index_elements=["id"],  # 以 id 作为唯一约束
+        set_={  # 冲突时更新的字段
+            "entry": stmt.excluded.entry
+        }
+    )
+
     await session.execute(stmt)
     await session.commit()
-
-@router.post("/producer/edit")
-async def edit_producers(
-    update_producers: list[ProducerEdit] = Body(),
-    session: AsyncSession = Depends(get_async_session)
-):
-    values = [p.model_dump() for p in update_producers]
-    await session.execute(update(Producer), values)
-    await session.commit()
+    return {"status": "ok"}
 
