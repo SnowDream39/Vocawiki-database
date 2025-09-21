@@ -4,7 +4,11 @@ from fastapi.responses import RedirectResponse
 from app.config import settings
 from app.routers.user import router as user_router
 from app.routers.entry import router as entry_router
+import sys
+import asyncio
 
+if sys.platform == "win32":
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 app = FastAPI()
 
