@@ -1,2 +1,2 @@
 source /var/www/Vocawiki-database/venv/bin/activate
-uvicorn app.main:app --reload
+python3 /var/www/Vocawiki-database/start.py
