@@ -7,3 +7,5 @@ uvicorn==0.36.0
 psycopg[async]==3.2.10
 tzdata==2025.2
 pytz>2021.1
+alembic==1.16.5
+psycopg2-binary==2.9.10

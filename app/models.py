@@ -15,7 +15,7 @@ class CommonEntry:
     VocaDB 和 Vocawiki 都有条目的对象。
     """
     id: Mapped[int] = mapped_column(Integer, primary_key=True, comment="VocaDB的id")
-    entry: Mapped[int] = mapped_column(String(100), comment="萌百条目名")
+    entry: Mapped[int] = mapped_column(String(100), index=True, comment="萌百条目名")
     pass
 
 class User(SQLAlchemyBaseUserTable, Base):
