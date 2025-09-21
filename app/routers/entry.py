@@ -1,14 +1,15 @@
 from fastapi import APIRouter, Depends, Query, Body, HTTPException
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, delete, or_
+from sqlalchemy import select, delete, and_
 from sqlalchemy.dialects.postgresql import insert
 
 from app.user_manager import current_active_user
 from app.session import get_async_session
-from app.models import Producer, ProducerSongBlacklist, ProducerSongWhitelist
-from app.schemas.entry import ProducerEdit, SongList
-router = APIRouter(prefix="/entry")
+from app.models import Producer, ProducerSong
+from app.schemas.entry import ProducerEdit, ProducerSongAdd, ProducerSongRemove, ProducerSongOut
+
+router = APIRouter(prefix="/entry", tags=["entry"])
 
 @router.get("/producer")
 async def get_producers_entrie(
@@ -29,7 +30,7 @@ async def search_producer_id(
     result = await session.execute(stmt)
     ids = result.scalars().all()
     if not ids:
-        return HTTPException(status_code=404, detail="Not Found")
+        raise HTTPException(status_code=404, detail="Not Found")
     return ids[0]
 
 @router.post("/producer/upsert")
@@ -51,68 +52,43 @@ async def upsert_producers(
     await session.commit()
     return {"status": "ok"}
 
-@router.post("/producer/song/blacklist/add")
-async def add_song_blacklist(
-    song_list: list[SongList] = Body(...),
+@router.get("/producer/song", response_model=list[ProducerSongOut])
+async def get_producer_song(
+    id: int = Query(...),
     session: AsyncSession = Depends(get_async_session)
 ):
-    values = [p.model_dump() for p in song_list]
-    stmt = insert(ProducerSongBlacklist).values(values)
-    stmt = stmt.on_conflict_do_nothing(
-        index_elements=["producer_id", "song_id"]
+    stmt = select(ProducerSong).where(ProducerSong.producer_id == id)
+    result = await session.execute(stmt)
+    producers =  result.scalars().all()
+    return producers
+
+
+@router.post("/producer/song")
+async def add_producer_song(
+    song: ProducerSongAdd = Body(...),
+    session: AsyncSession = Depends(get_async_session)
+):
+    stmt = insert(ProducerSong).values(song.model_dump())
+    stmt = stmt.on_conflict_do_update(
+        index_elements=["producer_id", "song_id"],
+        set_={
+            "description": stmt.excluded.description
+        }
     )
     await session.execute(stmt)
     await session.commit()
     return {"status": "ok"}
 
-@router.post("/producer/song/whitelist/add")
-async def add_song_whitelist(
-    song_list: list[SongList] = Body(...),
+@router.delete("/producer/song")
+async def remove_producer_song(
+    song: ProducerSongRemove = Body(...),
     session: AsyncSession = Depends(get_async_session)
 ):
-    values = [p.model_dump() for p in song_list]
-    stmt = insert(ProducerSongWhitelist).values(values)
-    stmt = stmt.on_conflict_do_nothing(
-        index_elements=["producer_id", "song_id"]
-    )
+    stmt = delete(ProducerSong).where(and_(
+        ProducerSong.producer_id == song.producer_id,
+        ProducerSong.song_id == song.song_id
+    ))
     await session.execute(stmt)
     await session.commit()
     return {"status": "ok"}
-
-@router.delete("/producer/song/blacklist/remove")
-async def remove_song_blacklist(
-    song_list: list[SongList] = Body(...),
-    session: AsyncSession = Depends(get_async_session)
-):
-    values = [p.model_dump() for p in song_list]
-    conditions = [
-        (ProducerSongBlacklist.producer_id == v["producer_id"]) &
-        (ProducerSongBlacklist.song_id == v["song_id"])
-        for v in values
-    ]
-
-    if conditions:
-        stmt = delete(ProducerSongBlacklist).where(or_(*conditions))
-        result = await session.execute(stmt)
-        await session.commit()
-        return {"deleted": result.rowcount}
-
-@router.delete("/producer/song/whitelist/remove")
-async def remove_song_whitelist(
-    song_list: list[SongList] = Body(...),
-    session: AsyncSession = Depends(get_async_session)
-):
-    values = [p.model_dump() for p in song_list]
-    conditions = [
-        (ProducerSongWhitelist.producer_id == v["producer_id"]) &
-        (ProducerSongWhitelist.song_id == v["song_id"])
-        for v in values
-    ]
-
-    if conditions:
-        stmt = delete(ProducerSongWhitelist).where(or_(*conditions))
-        result = await session.execute(stmt)
-        await session.commit()
-        return {"deleted": result.rowcount}
-
 

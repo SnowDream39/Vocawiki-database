@@ -1,4 +1,4 @@
-from sqlalchemy import ForeignKey, String, Integer, DateTime, UniqueConstraint
+from sqlalchemy import ForeignKey, String, Integer, DateTime, Text, UniqueConstraint
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from fastapi_users.db import SQLAlchemyBaseUserTable
@@ -37,9 +37,9 @@ class EditLog(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     old_content: Mapped[dict] = mapped_column(JSONB)
     new_content: Mapped[dict] = mapped_column(JSONB)
-    edited_by: Mapped[int] = mapped_column(ForeignKey("user.id"))
+    edited_by: Mapped[int] = mapped_column(Integer, ForeignKey("user.id"))
     edited_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now(utc))
-    approved_by: Mapped[int] = mapped_column(ForeignKey("user.id"))
+    approved_by: Mapped[int] = mapped_column(Integer, ForeignKey("user.id"))
     approved_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now(utc))
 
 class Producer(Base, CommonEntry):
@@ -47,9 +47,6 @@ class Producer(Base, CommonEntry):
     P主
     """
     __tablename__ = "producer"
-
-    songs_blacklist: Mapped[list["ProducerSongBlacklist"]] = relationship("ProducerSongBlacklist", back_populates="producer")
-    songs_whitelist: Mapped[list["ProducerSongWhitelist"]] = relationship("ProducerSongWhitelist", back_populates="producer")
 
 class Vocal(Base, CommonEntry):
     """
@@ -63,27 +60,17 @@ class Song(Base, CommonEntry):
     """
     __tablename__ = "song"
 
-class ProducerSongBlacklist(Base):
-    __tablename__ = 'producer_song_blacklist'
-    id: Mapped[int] = mapped_column(primary_key=True)
-    producer_id: Mapped[int] = mapped_column(Integer, ForeignKey("producer.id"))
-    song_id: Mapped[int] = mapped_column(Integer)
+class ProducerSong(Base):
+    """
+    P主歌曲列表
+    """
+    __tablename__ = "producer_song"
 
-    producer: Mapped["Producer"] = relationship("Producer", back_populates="songs_blacklist")
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    producer_id: Mapped[int] = mapped_column(Integer, ForeignKey("producer.id"), index=True)
+    song_id: Mapped[int] = mapped_column(Integer)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True, comment="简介，用HTML格式写")
 
     __table_args__ = (
-        UniqueConstraint("producer_id", "song_id", name="uq_blacklist"),
-    )
-
-
-class ProducerSongWhitelist(Base):
-    __tablename__ = 'producer_song_whitelist'
-    id: Mapped[int] = mapped_column(primary_key=True)
-    producer_id: Mapped[int] = mapped_column(Integer, ForeignKey("producer.id"))
-    song_id: Mapped[int] = mapped_column(Integer)
-
-    producer: Mapped["Producer"] = relationship("Producer", back_populates="songs_whitelist")
-
-    __table_args__ = (
-        UniqueConstraint("producer_id", "song_id", name="uq_whitelist"),
+        UniqueConstraint("producer_id", "song_id", name="uix_producer_song"),
     )
