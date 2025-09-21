@@ -1,4 +1,4 @@
-from sqlalchemy import ForeignKey, String, Integer, Text, DateTime
+from sqlalchemy import ForeignKey, String, Integer, DateTime, UniqueConstraint
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from fastapi_users.db import SQLAlchemyBaseUserTable
@@ -66,18 +66,24 @@ class Song(Base, CommonEntry):
 class ProducerSongBlacklist(Base):
     __tablename__ = 'producer_song_blacklist'
     id: Mapped[int] = mapped_column(primary_key=True)
-    producer_id: Mapped[int] = mapped_column(ForeignKey("producer.id"))
-    song_id: Mapped[int] = mapped_column(ForeignKey("song.id"))
+    producer_id: Mapped[int] = mapped_column(Integer, ForeignKey("producer.id"))
+    song_id: Mapped[int] = mapped_column(Integer)
 
     producer: Mapped["Producer"] = relationship("Producer", back_populates="songs_blacklist")
-    song: Mapped["Song"] = relationship("Song")
+
+    __table_args__ = (
+        UniqueConstraint("producer_id", "song_id", name="uq_blacklist"),
+    )
 
 
 class ProducerSongWhitelist(Base):
     __tablename__ = 'producer_song_whitelist'
     id: Mapped[int] = mapped_column(primary_key=True)
-    producer_id: Mapped[int] = mapped_column(ForeignKey("producer.id"))
-    song_id: Mapped[int] = mapped_column(ForeignKey("song.id"))
+    producer_id: Mapped[int] = mapped_column(Integer, ForeignKey("producer.id"))
+    song_id: Mapped[int] = mapped_column(Integer)
 
     producer: Mapped["Producer"] = relationship("Producer", back_populates="songs_whitelist")
-    song: Mapped["Song"] = relationship("Song")
+
+    __table_args__ = (
+        UniqueConstraint("producer_id", "song_id", name="uq_whitelist"),
+    )
