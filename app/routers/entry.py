@@ -62,6 +62,23 @@ async def get_producer_song(
     producers =  result.scalars().all()
     return producers
 
+@router.get("/producer/song/check")
+async def check_producer_song(
+    producer: int = Query(...),
+    song: int = Query(...),
+    session: AsyncSession = Depends(get_async_session)
+):
+    stmt = select(ProducerSong).where(and_(
+        ProducerSong.producer_id == producer,
+        ProducerSong.song_id == song
+    ))
+    result = await session.execute(stmt)
+    producers =  result.scalars().all()
+    if producers:
+        return True
+    else:
+        return False
+
 
 @router.post("/producer/song")
 async def add_producer_song(
