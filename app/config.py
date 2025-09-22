@@ -9,7 +9,7 @@ class Settings:
     APP_ENV: str = os.getenv("APP_ENV", "development")
     API_HOST: str = os.getenv("API_HOST", "http://localhost:8000")
     PORT: str = os.getenv("PORT", "8000")
-    COOKIE_DOMAIN: str = os.getenv("DOMAIN", "localhost:8000")
+    COOKIE_DOMAIN: str = os.getenv("COOKIE_DOMAIN", "localhost:8000")
     DEBUG: bool = os.getenv("DEBUG", "false").lower() == "true"
     ROOT: str = os.getenv("ROOT", "")
     SQL_USER: str = os.getenv("SQL_USER", "")
