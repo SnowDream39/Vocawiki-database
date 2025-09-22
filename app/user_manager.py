@@ -54,7 +54,7 @@ is_production = True # settings.APP_ENV = 'production'
 
 cookie_transport = CookieTransport(
     cookie_name="auth_cookie", 
-    cookie_max_age=36000, 
+    cookie_max_age=360000, 
     cookie_samesite="none" if is_production else "lax", 
     cookie_domain=settings.COOKIE_DOMAIN if is_production else None, 
     cookie_secure=is_production)

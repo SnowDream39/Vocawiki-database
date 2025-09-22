@@ -15,7 +15,7 @@ app = FastAPI()
 # 全局中间件
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["http://localhost:5173", "http://db.voca.wiki"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

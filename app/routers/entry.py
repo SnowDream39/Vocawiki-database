@@ -59,8 +59,8 @@ async def get_producer_song(
 ):
     stmt = select(ProducerSong).where(ProducerSong.producer_id == id)
     result = await session.execute(stmt)
-    producers =  result.scalars().all()
-    return producers
+    return result.scalars().all()
+
 
 @router.get("/producer/song/check")
 async def check_producer_song(
