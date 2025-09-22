@@ -36,6 +36,7 @@ async def search_producer_id(
 @router.post("/producer/upsert")
 async def upsert_producers(
     update_producers: list[ProducerEdit] = Body(...),
+    user = Depends(current_active_user),
     session: AsyncSession = Depends(get_async_session),
 ):
     values = [p.model_dump() for p in update_producers]
@@ -83,6 +84,7 @@ async def check_producer_song(
 @router.post("/producer/song")
 async def add_producer_song(
     song: ProducerSongAdd = Body(...),
+    user = Depends(current_active_user),
     session: AsyncSession = Depends(get_async_session)
 ):
     stmt = insert(ProducerSong).values(song.model_dump())
@@ -99,6 +101,7 @@ async def add_producer_song(
 @router.delete("/producer/song")
 async def remove_producer_song(
     song: ProducerSongRemove = Body(...),
+    user = Depends(current_active_user),
     session: AsyncSession = Depends(get_async_session)
 ):
     stmt = delete(ProducerSong).where(and_(
