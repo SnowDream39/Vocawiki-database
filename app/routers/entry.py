@@ -64,13 +64,13 @@ async def get_producer_song(
 
 @router.get("/producer/song/check")
 async def check_producer_song(
-    producer: int = Query(...),
-    song: int = Query(...),
+    producer_id: int = Query(...),
+    song_id: int = Query(...),
     session: AsyncSession = Depends(get_async_session)
 ):
     stmt = select(ProducerSong).where(and_(
-        ProducerSong.producer_id == producer,
-        ProducerSong.song_id == song
+        ProducerSong.producer_id == producer_id,
+        ProducerSong.song_id == song_id
     ))
     result = await session.execute(stmt)
     producers =  result.scalars().all()
