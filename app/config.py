@@ -15,6 +15,7 @@ class Settings:
     SQL_USER: str = os.getenv("SQL_USER", "")
     SQL_PASSWORD: str = os.getenv("SQL_PASSWORD", "")
     SQL_HOST: str = os.getenv("SQL_HOST", "localhost")
+    ALLOW_ORIGINS: list[str] = os.getenv("ALLOW_ORIGINS", "").split(',')
 
 settings = Settings()
 
