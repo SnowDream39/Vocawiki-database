@@ -6,12 +6,12 @@ from sqlalchemy.dialects.postgresql import insert
 
 from app.user_manager import current_active_user
 from app.session import get_async_session
-from app.models import Producer, ProducerSong
+from app.models import Producer, ProducerSong, Song
 from app.schemas.entry import ProducerEdit, ProducerSongAdd, ProducerSongRemove, ProducerSongOut
 
-router = APIRouter(prefix="/entry", tags=["entry"])
+router = APIRouter(prefix="/producer", tags=["producer"])
 
-@router.get("/producer")
+@router.get("")
 async def get_producers_entrie(
     ids: list[int] = Query(...),
     session: AsyncSession = Depends(get_async_session)
@@ -21,7 +21,7 @@ async def get_producers_entrie(
     producers = result.scalars().all()
     return producers
 
-@router.get("/producer/id")
+@router.get("/id")
 async def search_producer_id(
     entry: str = Query(...),
     session: AsyncSession = Depends(get_async_session)
@@ -33,7 +33,7 @@ async def search_producer_id(
         raise HTTPException(status_code=404, detail="Not Found")
     return ids[0]
 
-@router.post("/producer/upsert")
+@router.post("/upsert")
 async def upsert_producers(
     update_producers: list[ProducerEdit] = Body(...),
     user = Depends(current_active_user),
@@ -53,7 +53,7 @@ async def upsert_producers(
     await session.commit()
     return {"status": "ok"}
 
-@router.get("/producer/song", response_model=list[ProducerSongOut])
+@router.get("/song", response_model=list[ProducerSongOut])
 async def get_producer_song(
     id: int = Query(...),
     session: AsyncSession = Depends(get_async_session)
@@ -63,7 +63,7 @@ async def get_producer_song(
     return result.scalars().all()
 
 
-@router.get("/producer/song/check")
+@router.get("/song/check")
 async def check_producer_song(
     producer_id: int = Query(...),
     song_id: int = Query(...),
@@ -80,8 +80,23 @@ async def check_producer_song(
     else:
         return False
 
+@router.get("/song/info")
+async def get_producer_song_info(
+    producer_id: int = Query(...),
+    song_id: int = Query(...),
+    session: AsyncSession = Depends(get_async_session)
+):
+    stmt = select(*ProducerSong.__table__.c, Song.entry) \
+    .outerjoin(Song, ProducerSong.song_id == Song.id) \
+    .where(and_(
+        ProducerSong.producer_id == producer_id,
+        ProducerSong.song_id == song_id
+    ))
+    result = await session.execute(stmt)
+    songs = result.mappings().all()   # 因为我们的select语句写的是一系列的列名，所以这里用mappings()
+    return songs[0] if songs else None
 
-@router.post("/producer/song")
+@router.post("/song")
 async def add_producer_song(
     song: ProducerSongAdd = Body(...),
     user = Depends(current_active_user),
@@ -98,7 +113,7 @@ async def add_producer_song(
     await session.commit()
     return {"status": "ok"}
 
-@router.delete("/producer/song")
+@router.delete("/song")
 async def remove_producer_song(
     song: ProducerSongRemove = Body(...),
     user = Depends(current_active_user),

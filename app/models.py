@@ -1,8 +1,7 @@
 from sqlalchemy import ForeignKey, String, Integer, DateTime, Text, UniqueConstraint
 from sqlalchemy.dialects.postgresql import JSONB
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship, DeclarativeBase, foreign
 from fastapi_users.db import SQLAlchemyBaseUserTable
-from sqlalchemy.orm import DeclarativeBase
 from datetime import datetime, timezone
 
 utc = timezone.utc

@@ -50,11 +50,11 @@ bearer_transport = BearerTransport(tokenUrl="auth/jwt/login")
 
 # 🍪 Cookie 登录（适合前后端一起使用）
 
-is_production = True # settings.APP_ENV = 'production'
+is_production = settings.APP_ENV == 'production'
 
 cookie_transport = CookieTransport(
     cookie_name="auth_cookie", 
-    cookie_max_age=360000, 
+    cookie_max_age=60*60*24*100, 
     cookie_samesite="none" if is_production else "lax", 
     cookie_domain=settings.COOKIE_DOMAIN if is_production else None, 
     cookie_secure=is_production)

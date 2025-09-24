@@ -3,7 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 from app.config import settings
 from app.routers.user import router as user_router
-from app.routers.entry import router as entry_router
+from app.routers.producer import router as producer_router
+from app.routers.song import router as song_router
 import sys
 import asyncio
 
@@ -27,4 +28,5 @@ async def root():
 
 # 挂载子路由
 app.include_router(user_router)
-app.include_router(entry_router)
+app.include_router(producer_router)
+app.include_router(song_router)
