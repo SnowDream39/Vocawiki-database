@@ -69,6 +69,7 @@ class ProducerSong(Base):
     producer_id: Mapped[int] = mapped_column(Integer, ForeignKey("producer.id"), index=True)
     song_id: Mapped[int] = mapped_column(Integer)
     description: Mapped[str | None] = mapped_column(Text, nullable=True, comment="简介，用HTML格式写")
+    image: Mapped[str | None] = mapped_column(String(length=100), nullable=True)
 
     __table_args__ = (
         UniqueConstraint("producer_id", "song_id", name="uix_producer_song"),

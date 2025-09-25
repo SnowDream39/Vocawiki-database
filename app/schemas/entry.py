@@ -16,6 +16,7 @@ class ProducerSongAdd(BaseModel):
     producer_id: int
     song_id: int
     description: str | None = None
+    image: str | None = None
 
 class ProducerSongRemove(BaseModel):
     producer_id: int

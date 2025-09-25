@@ -106,7 +106,8 @@ async def add_producer_song(
     stmt = stmt.on_conflict_do_update(
         index_elements=["producer_id", "song_id"],
         set_={
-            "description": stmt.excluded.description
+            "description": stmt.excluded.description,
+            "image": stmt.excluded.image
         }
     )
     await session.execute(stmt)
